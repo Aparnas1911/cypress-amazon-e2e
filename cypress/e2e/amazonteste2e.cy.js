@@ -1,4 +1,4 @@
-describe('Amazon E2E Test - Search, Product, Cart, Checkout', () => {
+describe('Amazone Site E2E Test - Search, Product, Cart, Checkout', () => {
 
   beforeEach(() => {
     cy.visit('https://www.amazon.ca/')
