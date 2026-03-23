@@ -1,31 +1,64 @@
+describe('Amazon E2E Test - Search, Product, Cart, Checkout', () => {
 
-describe('Flipkart E2E Test', () => {
-
-  it('Search for a product and verify results', () => {
-    //Visit Amazon
+  beforeEach(() => {
     cy.visit('https://www.amazon.ca/')
-    //Search for product
-    cy.get('#twotabsearchtextbox').type('iphone 16 pro max')
+  })
+
+  it('Search → Select Product → Add to Cart → Checkout', () => {
+
+    // 🔹 Handle cookie popup (if present)
+    cy.get('body').then(($body) => {
+      if ($body.find('#sp-cc-accept').length > 0) {
+        cy.get('#sp-cc-accept').click()
+      }
+    })
+
+    // 🔹 Search product
+    cy.get('#twotabsearchtextbox')
+      .should('be.visible')
+      .type('iphone 16 pro max')
+
     cy.get('#nav-search-submit-button').click()
-    //Closing the Pop-up
-    cy.get('#sp-cc-accept').click({ multiple: true },{force: true})
-     //Verify search results
-     // cy.contains('Results').scrollIntoView().should('be.visible')
-    cy.get('.a-size-base-plus').click
-    //Click first product,Viewing the product
-    cy.contains('Apple iPhone 16 Pro Max, 256GB, Black Titanium (Renewed)').closest('a').click()
-    //Verifying the page
-    cy.get('#feature-bullets', { timeout: 10000 }) .scrollIntoView().should('be.visible').contains('About this item')
-    //adding to cart
-   cy.get('#add-to-cart-button', { timeout: 20000 }).should('be.visible').click()  
-   //Proceed to cart
-  cy.contains('Proceed to checkout', { timeout: 10000 }).should('be.visible').click()
-  //Proceed to cart-Login needed
-  cy.get('#ap_email_login').type('aparnasanthosh1119@gmail.com')
-  cy.get('#continue').should('be.visible').click()
-  cy.get('#ap_password').type("Qwerty@12345")
-  cy.get('#signInSubmit').should('be.visible').click()
-  cy.get('#verification-code-form').type('08391')
+
+    // 🔹 Click first product (stable approach)
+    cy.get('[data-component-type="s-search-result"]')
+      .first()
+      .find('h2 a')
+      .invoke('removeAttr', 'target') // stay in same tab
+      .click()
+
+    // 🔹 Verify product page
+    cy.get('#feature-bullets', { timeout: 10000 })
+      .scrollIntoView()
+      .should('be.visible')
+      .and('contain', 'About this item')
+
+    // 🔹 Add to cart
+    cy.get('#add-to-cart-button', { timeout: 20000 })
+      .should('be.visible')
+      .click()
+
+    // 🔹 Go to cart (Amazon sometimes shows this)
+    cy.contains('Go to Cart', { timeout: 10000 }).click({ force: true })
+
+    // 🔹 Proceed to checkout
+    cy.contains('Proceed to checkout', { timeout: 10000 })
+      .should('be.visible')
+      .click()
+
+    // 🔹 Login (NOTE: avoid hardcoding in real projects)
+    cy.get('#ap_email')
+      .should('be.visible')
+      .type(Cypress.env('AMAZON_EMAIL'))
+
+    cy.get('#continue').click()
+
+    cy.get('#ap_password')
+      .should('be.visible')
+      .type(Cypress.env('AMAZON_PASSWORD'))
+
+    cy.get('#signInSubmit').click()
 
   })
+
 })
