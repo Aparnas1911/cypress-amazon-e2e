@@ -1,64 +1,30 @@
 describe('Amazone Site E2E Test - Search, Product, Cart, Checkout', () => {
-
-  beforeEach(() => {
-    cy.visit('https://www.amazon.ca/')
-  })
-
-  it('Search → Select Product → Add to Cart → Checkout', () => {
-
-    // 🔹 Handle cookie popup (if present)
+ beforeEach(() => {
+    cy.visit('https://www.amazon.ca/')})
+     
+    //Handling pop-up
+    it('Search -> Select Product -> Add to cart -> Checkout',() => {
     cy.get('body').then(($body) => {
-      if ($body.find('#sp-cc-accept').length > 0) {
-        cy.get('#sp-cc-accept').click()
-      }
-    })
+    if ($body.find('#sp-cc-accept').length) {
+    cy.get('#sp-cc-accept').click()
+    }
 
-    // 🔹 Search product
-    cy.get('#twotabsearchtextbox')
-      .should('be.visible')
-      .type('iphone 16 pro max')
-
+    //Product Search
+    cy.get('#twotabsearchtextbox').should('be.visible').type('iphone 16 pro max')
     cy.get('#nav-search-submit-button').click()
 
-    // 🔹 Click first product (stable approach)
-    cy.get('[data-component-type="s-search-result"]')
-      .first()
-      .find('h2 a')
-      .invoke('removeAttr', 'target') // stay in same tab
-      .click()
+    //Selecting the first product
+    cy.get('[data-component-type="s-search-result"] h2').first().click() 
+    
+    //Verifying the product details page
+    cy.get('#feature-bullets').should('contain','About this item')
 
-    // 🔹 Verify product page
-    cy.get('#feature-bullets', { timeout: 10000 })
-      .scrollIntoView()
-      .should('be.visible')
-      .and('contain', 'About this item')
+    //Add to cart
+    cy.get('#add-to-cart-button').should('be.visible').click()
 
-    // 🔹 Add to cart
-    cy.get('#add-to-cart-button', { timeout: 20000 })
-      .should('be.visible')
-      .click()
-
-    // 🔹 Go to cart (Amazon sometimes shows this)
-    cy.contains('Go to Cart', { timeout: 10000 }).click({ force: true })
-
-    // 🔹 Proceed to checkout
-    cy.contains('Proceed to checkout', { timeout: 10000 })
-      .should('be.visible')
-      .click()
-
-    // 🔹 Login (NOTE: avoid hardcoding in real projects)
-    cy.get('#ap_email')
-      .should('be.visible')
-      .type(Cypress.env('AMAZON_EMAIL'))
-
-    cy.get('#continue').click()
-
-    cy.get('#ap_password')
-      .should('be.visible')
-      .type(Cypress.env('AMAZON_PASSWORD'))
-
-    cy.get('#signInSubmit').click()
-
-  })
-
+    //Proceed to checkout
+    cy.get('#sc-buy-box-ptc-button').should('be.visible').click()
+    })
+    }
+    )
 })
