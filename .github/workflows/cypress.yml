@@ -3,6 +3,7 @@ name: Cypress Tests
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   cypress-run:
@@ -16,3 +17,17 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
